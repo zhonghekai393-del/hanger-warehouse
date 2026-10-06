@@ -1,14 +1,5 @@
-import { promisify } from "node:util";
-import { randomBytes, scrypt as scryptCallback } from "node:crypto";
 import { pool } from "../src/lib/db";
-
-const scrypt = promisify(scryptCallback);
-
-async function hashPassword(password: string): Promise<string> {
-  const salt = randomBytes(16).toString("hex");
-  const derivedKey = (await scrypt(password, salt, 64)) as Buffer;
-  return `scrypt$${salt}$${derivedKey.toString("hex")}`;
-}
+import { hashPassword } from "../src/lib/auth/password";
 
 async function upsertUser(username: string, password: string, role: "ADMIN" | "OPERATOR") {
   await pool.query(
