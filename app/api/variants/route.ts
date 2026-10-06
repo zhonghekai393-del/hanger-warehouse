@@ -48,7 +48,7 @@ export async function POST(request: Request) {
       );
       await client.query(
         `INSERT INTO inventory (variant_id, warehouse_id)
-         SELECT $1, id FROM warehouses WHERE is_active = true
+         SELECT $1, id FROM warehouses WHERE code = 'MAIN' AND is_active = true
          ON CONFLICT (variant_id, warehouse_id) DO NOTHING`,
         [variant.rows[0].id],
       );

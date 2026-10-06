@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { updateVariantQuantity } from "@/src/lib/inventory/client-state";
 
 type StockType = "IN" | "OUT" | "ADJUSTMENT";
 type Variant = { id: string; product_name: string; model: string; sku: string; unit: string; packSize: number; quantity: number };
@@ -48,6 +49,7 @@ export function StockForm({ type }: { type: StockType }) {
       const body = await response.json();
       if (!response.ok) throw new Error(body.error?.message || "库存操作失败");
       setSuccess(`操作成功：${body.data.beforeQuantity.toLocaleString()} → ${body.data.afterQuantity.toLocaleString()} ${selected.unit}`);
+      setVariants((current) => updateVariantQuantity(current, selected.id, body.data.afterQuantity));
       setQuantity(""); setRemark("");
     } catch (submitError) { setError(submitError instanceof Error ? submitError.message : "库存操作失败"); }
     finally { setSubmitting(false); }

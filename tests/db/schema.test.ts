@@ -50,7 +50,6 @@ describe.skipIf(!databaseUrl)("initial PostgreSQL schema", () => {
     );
     expect(barcodeIndex.rowCount).toBe(1);
 
-    await pool.end();
   });
 });
 
