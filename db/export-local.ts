@@ -43,7 +43,7 @@ export async function exportLocalSnapshot(): Promise<LocalSnapshot> {
   return mapDatabaseRowsToLocalSnapshot({ products: products.rows, variants: variants.rows, warehouses: warehouses.rows, inventory: inventory.rows, movements: movements.rows });
 }
 
-export async function main(outputPath = process.argv[2] ?? "backups/current-local.json"): Promise<void> {
+export async function main(outputPath = process.argv.slice(2).find((argument) => argument !== "--") ?? "backups/current-local.json"): Promise<void> {
   const snapshot = await exportLocalSnapshot();
   const resolvedPath = path.resolve(outputPath);
   await writeFile(resolvedPath, `${JSON.stringify(snapshot, null, 2)}\n`, "utf8");
