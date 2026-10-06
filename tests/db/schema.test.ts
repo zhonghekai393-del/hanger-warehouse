@@ -27,12 +27,19 @@ describe.skipIf(!databaseUrl)("initial PostgreSQL schema", () => {
        FROM information_schema.table_constraints
        WHERE constraint_schema = 'public'
          AND constraint_name = ANY($1::text[])`,
-      [["product_variants_sku_key", "inventory_variant_id_warehouse_id_key"]],
+      [[
+        "product_variants_sku_key",
+        "inventory_variant_id_warehouse_id_key",
+        "stock_movements_balance_check",
+        "stock_movements_type_quantity_check",
+      ]],
     );
 
     expect(constraints.rows.map((row) => row.constraint_name).sort()).toEqual([
       "inventory_variant_id_warehouse_id_key",
       "product_variants_sku_key",
+      "stock_movements_balance_check",
+      "stock_movements_type_quantity_check",
     ]);
 
     const barcodeIndex = await pool.query<{ indexname: string }>(

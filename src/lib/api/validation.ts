@@ -9,12 +9,12 @@ export const loginSchema = z.object({
 
 export const productInputSchema = z.object({
   name: z.string().trim().min(1).max(100),
-  categoryId: z.string().min(1).nullable().optional(),
+  categoryId: z.string().uuid().nullable().optional(),
   description: optionalText,
 }).strict();
 
 export const productVariantInputSchema = z.object({
-  productId: z.string().min(1),
+  productId: z.string().uuid(),
   model: z.string().trim().min(1).max(100),
   sku: z.string().trim().min(1).max(100),
   barcode: optionalText,
@@ -28,8 +28,8 @@ export const productVariantInputSchema = z.object({
 }).strict();
 
 export const movementRequestSchema = z.object({
-  variantId: z.string().min(1),
-  warehouseId: z.string().min(1),
+  variantId: z.string().uuid(),
+  warehouseId: z.string().uuid(),
   type: z.enum(["IN", "OUT", "ADJUSTMENT"]),
   inputQuantity: z.number().int().nonnegative(),
   inputUnit: z.string().trim().min(1).max(20),

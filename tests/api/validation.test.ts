@@ -22,4 +22,15 @@ describe("API input validation", () => {
     });
     expect(result.success).toBe(false);
   });
+
+  it("rejects non-UUID resource identifiers at the API boundary", () => {
+    const result = movementRequestSchema.safeParse({
+      variantId: "not-a-uuid",
+      warehouseId: "also-not-a-uuid",
+      type: "IN",
+      inputQuantity: 1,
+      inputUnit: "个",
+    });
+    expect(result.success).toBe(false);
+  });
 });
