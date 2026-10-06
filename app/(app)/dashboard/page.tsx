@@ -15,7 +15,7 @@ export default function DashboardPage() {
     {error && <p className="form-error" role="alert">{error}</p>}
     <section className="metric-grid" aria-label="库存指标">
       <div className="metric-block primary-metric"><span>当前库存总量</span><strong>{values.totalQuantity.toLocaleString()}</strong><small>个</small></div>
-      <div className="metric-block"><span>SKU 数量</span><strong>{values.skuCount}</strong></div>
+      <div className="metric-block"><span>货号数量</span><strong>{values.skuCount}</strong></div>
       <div className="metric-block"><span>今日入库</span><strong className="positive-text">+{values.todayIn.toLocaleString()}</strong></div>
       <div className="metric-block"><span>今日出库</span><strong className="negative-text">-{values.todayOut.toLocaleString()}</strong></div>
       <div className="metric-block warning-metric"><span>库存不足</span><strong>{values.lowCount}</strong></div>

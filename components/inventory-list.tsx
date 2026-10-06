@@ -20,7 +20,7 @@ function getStatus(quantity: number, minimumStock: number): "NORMAL" | "LOW" | "
 }
 
 export function InventoryList({ rows }: { rows: InventoryRow[] }) {
-  if (!rows.length) return <div className="empty-state"><strong>还没有库存型号</strong><span>先去商品型号创建一个 SKU。</span></div>;
+  if (!rows.length) return <div className="empty-state"><strong>还没有库存型号</strong><span>先去商品型号创建一个货号。</span></div>;
   return (
     <div className="inventory-list">
       {rows.map((row) => {

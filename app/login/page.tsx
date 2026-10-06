@@ -30,7 +30,7 @@ export default function LoginPage() {
     <main className="login-shell">
       <section className="login-panel">
         <div className="brand-block login-brand"><span className="brand-mark">衣</span><div><strong>衣架仓库</strong><span>库存与出入库管理</span></div></div>
-        <div className="section-heading"><p className="eyebrow">Welcome back</p><h1>登录操作台</h1><p>用账号进入仓库工作区。</p></div>
+        <div className="section-heading"><p className="eyebrow">欢迎回来</p><h1>登录操作台</h1><p>用账号进入仓库工作区。</p></div>
         <form className="stack-form" onSubmit={submit}>
           <label>账号<input autoComplete="username" value={username} onChange={(event) => setUsername(event.target.value)} placeholder="请输入账号" required /></label>
           <label>密码<input autoComplete="current-password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="请输入密码" required /></label>
