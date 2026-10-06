@@ -11,6 +11,8 @@ export type LocalProduct = {
   updatedAt?: string;
 };
 
+export type ProductListItem = LocalProduct & { variantCount: number };
+
 export type LocalVariant = {
   id: string;
   productId: string;
