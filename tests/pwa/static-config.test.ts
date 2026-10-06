@@ -14,4 +14,11 @@ describe("static export boundary", () => {
     await expect(readFile("app/(app)/products/detail/page.tsx", "utf8")).resolves.toContain("useSearchParams");
     await expect(readFile("app/(app)/products/variant/page.tsx", "utf8")).resolves.toContain("useSearchParams");
   });
+
+  it("has an offline cache shell", async () => {
+    const serviceWorker = await readFile("public/sw.js", "utf8");
+    expect(serviceWorker).toContain("caches.open");
+    expect(serviceWorker).toContain("clients.claim");
+    expect(serviceWorker).toContain("dashboard");
+  });
 });

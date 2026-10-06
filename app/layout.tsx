@@ -1,12 +1,13 @@
 import type { Metadata, Viewport } from "next";
 import { appName } from "@/src/lib/config";
+import { withBasePath } from "@/src/lib/local/config";
 import { ServiceWorkerRegister } from "@/components/service-worker-register";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: appName,
   description: "衣架型号库存与出入库管理系统",
-  manifest: "/manifest.webmanifest",
+  manifest: withBasePath("/manifest.webmanifest"),
 };
 
 export const viewport: Viewport = { themeColor: "#2f6f4e" };
