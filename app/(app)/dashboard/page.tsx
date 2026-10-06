@@ -2,13 +2,15 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-
-type Metrics = { skuCount: number; totalQuantity: number; todayIn: number; todayOut: number; lowCount: number; outCount: number };
+import { getLocalRepository } from "@/src/lib/local/repository";
+import type { DashboardMetrics } from "@/src/lib/local/types";
 
 export default function DashboardPage() {
-  const [metrics, setMetrics] = useState<Metrics | null>(null);
+  const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
   const [error, setError] = useState("");
-  useEffect(() => { fetch("/api/dashboard").then((response) => response.json()).then((body) => { if (body.data) setMetrics(body.data); else setError(body.error?.message || "暂时无法加载看板"); }).catch(() => setError("暂时无法加载看板")); }, []);
+  useEffect(() => {
+    getLocalRepository().getDashboardMetrics().then(setMetrics).catch((loadError) => setError(loadError instanceof Error ? loadError.message : "暂时无法加载看板"));
+  }, []);
   const values = metrics || { skuCount: 0, totalQuantity: 0, todayIn: 0, todayOut: 0, lowCount: 0, outCount: 0 };
   return <div className="page-stack">
     <div className="page-heading"><div><p className="eyebrow">仓库总览</p><h1>今天，仓库怎么样？</h1><p>先看库存状态，再开始处理出入库。</p></div><Link className="outline-button desktop-only" href="/movements">查看全部流水</Link></div>

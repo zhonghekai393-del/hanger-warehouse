@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { InventoryList } from "@/components/inventory-list";
+import { getLocalRepository } from "@/src/lib/local/repository";
+import type { InventoryRow } from "@/src/lib/local/types";
 
 export default function InventoryPage() {
   const [query, setQuery] = useState("");
-  const [rows, setRows] = useState<never[]>([]);
+  const [rows, setRows] = useState<InventoryRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -13,10 +15,7 @@ export default function InventoryPage() {
     setLoading(true);
     setError("");
     try {
-      const response = await fetch(`/api/inventory?q=${encodeURIComponent(value)}`);
-      const body = await response.json();
-      if (!response.ok) throw new Error(body.error?.message || "库存加载失败");
-      setRows(body.data);
+      setRows(await getLocalRepository().listInventory(value));
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : "库存加载失败");
     } finally { setLoading(false); }
@@ -24,12 +23,8 @@ export default function InventoryPage() {
 
   useEffect(() => {
     let active = true;
-    fetch("/api/inventory?q=")
-      .then(async (response) => {
-        const body = await response.json();
-        if (!response.ok) throw new Error(body.error?.message || "库存加载失败");
-        if (active) setRows(body.data);
-      })
+    getLocalRepository().listInventory("")
+      .then((data) => { if (active) setRows(data); })
       .catch((loadError) => { if (active) setError(loadError instanceof Error ? loadError.message : "库存加载失败"); })
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };

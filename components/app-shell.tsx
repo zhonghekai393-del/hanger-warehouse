@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { BottomNav } from "@/components/bottom-nav";
-
-type User = { username: string; role: "ADMIN" | "OPERATOR" };
+import { localUser } from "@/src/lib/local/config";
+import { getLocalRepository } from "@/src/lib/local/repository";
 
 const navItems = [
   ["/dashboard", "首页"],
@@ -15,28 +15,18 @@ const navItems = [
 ] as const;
 
 export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) {
-  const router = useRouter();
   const pathname = usePathname();
-  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    fetch("/api/auth/me")
-      .then(async (response) => {
-        if (!response.ok) throw new Error("unauthorized");
-        const body = await response.json();
-        setUser(body.data);
-      })
-      .catch(() => router.replace("/login"))
+    getLocalRepository().initialize()
+      .catch((loadError) => setError(loadError instanceof Error ? loadError.message : "本地仓库打开失败"))
       .finally(() => setLoading(false));
-  }, [router]);
+  }, []);
 
-  async function logout() {
-    await fetch("/api/auth/logout", { method: "POST" });
-    router.replace("/login");
-  }
-
-  if (loading || !user) return <div className="app-loading">正在打开仓库...</div>;
+  if (loading) return <div className="app-loading">正在打开仓库...</div>;
+  if (error) return <div className="app-loading"><p className="form-error" role="alert">{error}</p><p>请更换支持本地存储的浏览器后重试。</p></div>;
 
   return (
     <div className="app-frame">
@@ -48,12 +38,12 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
         <nav aria-label="侧边导航">
           {navItems.map(([href, label]) => <Link className={pathname.startsWith(href) ? "side-link active" : "side-link"} href={href} key={href}>{label}</Link>)}
         </nav>
-        <button className="text-button side-logout" onClick={logout}>退出登录</button>
+        <Link className="text-button side-logout" href="/settings/">本机设置</Link>
       </aside>
       <div className="app-content">
         <header className="top-bar">
           <div><span className="mobile-brand">衣架仓库</span><span className="desktop-only">仓库管理 / {navItems.find(([href]) => pathname.startsWith(href))?.[1] || "操作台"}</span></div>
-          <div className="user-chip"><span>{user.username}</span><span className="role-label">{user.role === "ADMIN" ? "管理员" : "操作员"}</span></div>
+          <div className="user-chip"><span>{localUser.username}</span><span className="role-label">管理员</span></div>
         </header>
         <main className="main-content">{children}</main>
         <BottomNav />
