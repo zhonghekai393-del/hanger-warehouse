@@ -144,8 +144,11 @@ label { display: grid; gap: 7px; color: var(--ink); font-size: 0.88rem; font-wei
 .inline-form { display: flex; gap: 8px; margin: 18px 0; }
 .inline-form input { min-width: 0; flex: 1; }
 .record-item { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px; }
-.record-item > span { color: var(--muted); font-size: 0.76rem; text-align: right; }
-.variant-card { display: flex; justify-content: space-between; gap: 12px; padding: 18px; }
+.record-item-link { display: flex; min-width: 0; flex: 1; align-items: center; justify-content: space-between; gap: 12px; }
+.record-item-link > span { color: var(--muted); font-size: 0.76rem; text-align: right; }
+.variant-card { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px; }
+.variant-card-link { display: flex; min-width: 0; flex: 1; justify-content: space-between; gap: 12px; }
+.danger-button { color: #a13e39; }
 .variant-card h2 { margin: 4px 0 0; font-size: 1.08rem; }
 .variant-card p { margin: 5px 0 0; }
 .variant-stock { display: grid; align-content: center; justify-items: end; }
@@ -162,8 +165,10 @@ label { display: grid; gap: 7px; color: var(--ink); font-size: 0.88rem; font-wei
 .movement-row { display: grid; grid-template-columns: 1fr auto; gap: 8px 12px; padding: 14px; }
 .movement-title, .movement-main, .movement-meta { display: flex; min-width: 0; gap: 8px; align-items: baseline; }
 .movement-title { grid-column: 1 / -1; justify-content: space-between; }
+.movement-title-actions { display: flex; align-items: center; gap: 12px; }
 .movement-title strong { color: var(--accent); font-size: 0.86rem; }
 .movement-title span, .movement-main span, .movement-meta { color: var(--muted); font-size: 0.75rem; }
+.movement-delete { min-height: 32px; }
 .movement-main { display: grid; gap: 2px; }
 .movement-main strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .movement-delta { align-self: center; font-size: 1.2rem; font-weight: 750; }

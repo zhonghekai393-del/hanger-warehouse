@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { pool } from "@/src/lib/db";
+import { pool, withTransaction } from "@/src/lib/db";
 import { requireAdmin, requireUser } from "@/src/lib/auth/guard";
 import { errorResponse, jsonError, readJson } from "@/src/lib/api/http";
 import { productInputSchema } from "@/src/lib/api/validation";
@@ -52,8 +52,13 @@ export async function DELETE(request: Request, context: Context) {
   try {
     await requireAdmin(request);
     const { id } = await context.params;
-    const result = await pool.query("UPDATE products SET is_active = false, updated_at = now() WHERE id = $1 RETURNING id", [id]);
-    if (!result.rowCount) return jsonError("商品不存在", 404, "NOT_FOUND");
+    const result = await withTransaction(async (client) => {
+      const product = await client.query("UPDATE products SET is_active = false, updated_at = now() WHERE id = $1 RETURNING id", [id]);
+      if (!product.rowCount) return null;
+      await client.query("UPDATE product_variants SET is_active = false, updated_at = now() WHERE product_id = $1", [id]);
+      return product.rows[0];
+    });
+    if (!result) return jsonError("商品不存在", 404, "NOT_FOUND");
     return NextResponse.json({ data: { id, isActive: false } });
   } catch (error) {
     return errorResponse(error);
