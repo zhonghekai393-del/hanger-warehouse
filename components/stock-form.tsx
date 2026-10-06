@@ -2,15 +2,15 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { updateVariantQuantity } from "@/src/lib/inventory/client-state";
+import { getLocalRepository } from "@/src/lib/local/repository";
+import type { InventoryRow } from "@/src/lib/local/types";
 
 type StockType = "IN" | "OUT" | "ADJUSTMENT";
-type Variant = { id: string; product_name: string; model: string; sku: string; unit: string; packSize: number; quantity: number };
 type Warehouse = { id: string; name: string };
 
 export function StockForm({ type }: { type: StockType }) {
   const isAdjustment = type === "ADJUSTMENT";
-  const [variants, setVariants] = useState<Variant[]>([]);
+  const [variants, setVariants] = useState<InventoryRow[]>([]);
   const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
   const [variantId, setVariantId] = useState("");
   const [warehouseId, setWarehouseId] = useState("");
@@ -22,11 +22,14 @@ export function StockForm({ type }: { type: StockType }) {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    Promise.all([fetch("/api/variants").then((response) => response.json()), fetch("/api/warehouses").then((response) => response.json())]).then(([variantBody, warehouseBody]) => {
-      setVariants(variantBody.data || []);
-      setWarehouses(warehouseBody.data || []);
-      if (warehouseBody.data?.[0]) setWarehouseId(warehouseBody.data[0].id);
-    }).catch(() => setError("基础数据加载失败"));
+    let active = true;
+    Promise.all([getLocalRepository().listInventory(), getLocalRepository().listWarehouses()]).then(([inventory, warehouseData]) => {
+      if (!active) return;
+      setVariants(inventory);
+      setWarehouses(warehouseData);
+      if (warehouseData[0]) setWarehouseId(warehouseData[0].id);
+    }).catch((loadError) => { if (active) setError(loadError instanceof Error ? loadError.message : "基础数据加载失败"); });
+    return () => { active = false; };
   }, []);
 
   const selected = variants.find((variant) => variant.id === variantId);
@@ -45,18 +48,16 @@ export function StockForm({ type }: { type: StockType }) {
     if (isAdjustment && !remark.trim()) { setError("库存调整必须填写原因"); return; }
     setSubmitting(true);
     try {
-      const response = await fetch("/api/stock/movements", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ variantId, warehouseId, type, inputQuantity: Number(quantity) || 0, inputUnit: isAdjustment ? selected.unit : unit, actualQuantity: isAdjustment ? Number(quantity) : undefined, remark }) });
-      const body = await response.json();
-      if (!response.ok) throw new Error(body.error?.message || "库存操作失败");
-      setSuccess(`操作成功：${body.data.beforeQuantity.toLocaleString()} → ${body.data.afterQuantity.toLocaleString()} ${selected.unit}`);
-      setVariants((current) => updateVariantQuantity(current, selected.id, body.data.afterQuantity));
+      const result = await getLocalRepository().applyMovement({ variantId, warehouseId, type, inputQuantity: Number(quantity) || 0, inputUnit: isAdjustment ? selected.unit : unit, actualQuantity: isAdjustment ? Number(quantity) : undefined, remark, operator: "本机用户", createdAt: new Date().toISOString() });
+      setSuccess(`操作成功：${result.movement.beforeQuantity.toLocaleString()} → ${result.movement.afterQuantity.toLocaleString()} ${selected.unit}`);
+      setVariants(await getLocalRepository().listInventory());
       setQuantity(""); setRemark("");
     } catch (submitError) { setError(submitError instanceof Error ? submitError.message : "库存操作失败"); }
     finally { setSubmitting(false); }
   }
 
   return <form className="stock-form" onSubmit={submit}>
-    <div className="form-section"><label>商品型号<select value={variantId} onChange={(event) => setVariantId(event.target.value)} required><option value="">请选择商品型号</option>{variants.map((variant) => <option key={variant.id} value={variant.id}>{variant.product_name} · {variant.model} · {variant.sku}</option>)}</select></label>{selected && <div className="selected-stock"><span>当前库存</span><strong>{selected.quantity.toLocaleString()} {selected.unit}</strong><small>{selected.packSize} 个/箱</small></div>}</div>
+    <div className="form-section"><label>商品型号<select value={variantId} onChange={(event) => setVariantId(event.target.value)} required><option value="">请选择商品型号</option>{variants.map((variant) => <option key={variant.id} value={variant.id}>{variant.productName} · {variant.model} · {variant.sku}</option>)}</select></label>{selected && <div className="selected-stock"><span>当前库存</span><strong>{selected.quantity.toLocaleString()} {selected.unit}</strong><small>{selected.packSize} 个/箱</small></div>}</div>
     <div className="form-grid"><label>{isAdjustment ? "实际盘点库存" : "数量"}<input inputMode="numeric" min="0" step="1" type="number" value={quantity} onChange={(event) => setQuantity(event.target.value)} placeholder="请输入整数" required /></label>{!isAdjustment && <label>单位<select value={unit} onChange={(event) => setUnit(event.target.value)}><option value="个">个</option><option value="箱">箱</option></select></label>}</div>
     {!isAdjustment && selected && <p className="conversion-note">本次{type === "IN" ? "入库" : "出库"}：{preview?.actual?.toLocaleString() || 0} {selected.unit}</p>}
     {preview && <div className={`preview-box ${preview.after < 0 ? "preview-danger" : ""}`}><span>{isAdjustment ? "调整后库存" : type === "IN" ? "入库后库存" : "预计剩余"}</span><strong>{preview.after.toLocaleString()} {selected?.unit}</strong></div>}
