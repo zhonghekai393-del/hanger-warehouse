@@ -14,7 +14,7 @@ export async function GET(request: Request, context: Context) {
               pv.unit, pv.pack_size AS "packSize", pv.minimum_stock AS "minimumStock",
               p.id AS "productId", p.name AS product_name,
               COALESCE(SUM(i.quantity), 0)::int AS quantity,
-              max(i.warehouse_id) AS "warehouseId"
+              max(i.warehouse_id::text) AS "warehouseId"
        FROM product_variants pv
        JOIN products p ON p.id = pv.product_id
        LEFT JOIN inventory i ON i.variant_id = pv.id

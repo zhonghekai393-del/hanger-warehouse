@@ -11,8 +11,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest",
     "test:watch": "vitest --watch",
-    "db:migrate": "node --import tsx db/migrate.ts",
-    "db:seed": "node --import tsx db/seed.ts"
+    "db:migrate": "node --env-file=.env --import tsx db/migrate.ts",
+    "db:seed": "node --env-file=.env --import tsx db/seed.ts"
   },
   "dependencies": {
     "next": "latest",
