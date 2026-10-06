@@ -1,6 +1,8 @@
 node_modules/
 .next/
 out/
+backups/*.json
+*.local-backup.json
 coverage/
 .env
 .env.*

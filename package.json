@@ -11,6 +11,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest",
     "test:watch": "vitest --watch",
+    "db:export-local": "node --env-file=.env --import tsx db/export-local.ts",
     "db:migrate": "node --env-file=.env --import tsx db/migrate.ts",
     "db:seed": "node --env-file=.env --import tsx db/seed.ts"
   },
