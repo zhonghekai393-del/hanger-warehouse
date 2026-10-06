@@ -21,4 +21,11 @@ describe("static export boundary", () => {
     expect(serviceWorker).toContain("clients.claim");
     expect(serviceWorker).toContain("dashboard");
   });
+
+  it("keeps server API routes outside the static app", async () => {
+    const { readdir } = await import("node:fs/promises");
+    await expect(readdir("app/api", { recursive: true })).rejects.toThrow();
+    const sources = await Promise.all(["components/app-shell.tsx", "components/stock-form.tsx", "app/(app)/movements/page.tsx"].map((path) => readFile(path, "utf8")));
+    expect(sources.join("\n")).not.toContain("/api/");
+  });
 });
